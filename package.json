@@ -1,0 +1,38 @@
+{
+  "name": "create-prettier-standard",
+  "version": "0.0.0",
+  "description": "Initialize an app with prettier-standard, husky, lint-staged.",
+  "main": "index.js",
+  "bin": {
+    "create-prettier-standard": "create-prettier-standard.js"
+  },
+  "dependencies": {
+    "lint-staged": "^8.1.7",
+    "husky": "^2.3.0"
+  },
+  "devDependencies": {
+    "prettier-standard": "^9.1.1"
+  },
+  "scripts": {
+    "format": "prettier-standard 'index.js'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JustinDFuller/create-prettier-standard.git"
+  },
+  "keywords": [
+    "prettier-standard",
+    "format",
+    "ci",
+    "lint",
+    "eslint",
+    "prettier",
+    "standard"
+  ],
+  "author": "Justin Fuller <justindanielfuller@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JustinDFuller/create-prettier-standard/issues"
+  },
+  "homepage": "https://github.com/JustinDFuller/create-prettier-standard#readme"
+}
