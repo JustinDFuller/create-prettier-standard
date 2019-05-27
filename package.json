@@ -1,4 +1,20 @@
 {
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "linters": {
+      "{src,lib,test,tests,__tests__,bin}/**/*.js": [
+        "prettier-standard",
+        "git add"
+      ]
+    }
+  },
+  "scripts": {
+    "format": "prettier-standard \"{src,lib,test,tests,__tests__,bin}/**/*.js\""
+  },
   "name": "create-prettier-standard",
   "version": "0.0.2",
   "description": "Initialize an app with prettier-standard, husky, lint-staged.",
@@ -6,15 +22,11 @@
   "bin": {
     "create-prettier-standard": "bin/create-prettier-standard.js"
   },
-  "dependencies": {
-    "lint-staged": "^8.1.7",
-    "husky": "^2.3.0"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "husky": "^2.3.0",
+    "lint-staged": "^8.1.7",
     "prettier-standard": "^9.1.1"
-  },
-  "scripts": {
-    "format": "prettier-standard 'index.js'"
   },
   "repository": {
     "type": "git",
