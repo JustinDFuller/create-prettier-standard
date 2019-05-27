@@ -1,11 +1,29 @@
 const path = require('path')
 const { promisify } = require('util')
 const { readFile, writeFile } = require('fs')
-const { exec } = require('child_process')
+const { spawn } = require('child_process')
 
-const execAsync = promisify(exec)
 const readFileAsync = promisify(readFile)
 const writeFileAsync = promisify(writeFile)
+
+const DEFAULT_PATTERN = '{src,lib,test,tests,__tests__,bin}/**/*.js'
+
+function execAsync (command) {
+  return new Promise(function (resolve, reject) {
+    const [cmd, ...args] = command.split(/\s/)
+    const process = spawn(cmd, args)
+
+    process.stdout.on('data', function (data) {
+      console.log(data.toString())
+    })
+    process.stderr.on('data', function (data) {
+      console.error(data.toString())
+    })
+
+    process.on('close', resolve)
+    process.on('error', reject)
+  })
+}
 
 async function getPackageJsonString (packageJsonPath) {
   try {
@@ -23,10 +41,28 @@ function parsePackageJson (packageJsonString, packageJsonPath) {
   }
 }
 
-module.exports = async function (
-  pattern = '{src,lib,test,tests,__tests__,bin}/**/*.js'
-) {
-  const defaults = {
+function merge (...objects) {
+  return objects.reduce(function (sum, value) {
+    for (let key in value) {
+      const property = value[key]
+
+      if (
+        typeof property === 'object' &&
+        property !== null &&
+        !Array.isArray(property)
+      ) {
+        sum[key] = merge(sum[key] || {}, property)
+      } else {
+        sum[key] = property
+      }
+    }
+
+    return sum
+  }, {})
+}
+
+function getDefaults (pattern = DEFAULT_PATTERN) {
+  return {
     husky: {
       hooks: {
         'pre-commit': 'lint-staged'
@@ -41,43 +77,27 @@ module.exports = async function (
       format: `prettier-standard "${pattern}"`
     }
   }
+}
+
+module.exports = async function (pattern) {
+  const defaults = getDefaults(pattern)
 
   const packageJsonPath = path.join(process.cwd(), 'package.json')
   const packageJsonString = await getPackageJsonString(packageJsonPath)
   const packageJson = parsePackageJson(packageJsonString, packageJsonPath)
 
-  if (packageJson.husky === undefined) {
-    packageJson.husky = defaults.husky
-  } else if (packageJson.husky.hooks === undefined) {
-    packageJson.husky.hooks = defaults.husky.hooks
-  } else if (packageJson.husky.hooks['pre-commit'] === undefined) {
-    packageJson.husky.hooks['pre-commit'] = defaults.husky.hooks['pre-commit']
-  }
+  // the order here is important so that existing package json properties are not overwritten.
+  const updatedPackageJson = merge(defaults, packageJson)
 
-  if (packageJson['lint-staged'] === undefined) {
-    packageJson['lint-staged'] = defaults['lint-staged']
-  } else if (packageJson['lint-staged'].linters === undefined) {
-    packageJson['lint-staged'].linters = defaults['lint-staged'].linters
-  } else if (packageJson['lint-staged'].linters[pattern] === undefined) {
-    packageJson['lint-staged'].linters[pattern] =
-      defaults['lint-staged'].linters[pattern]
-  }
-
-  if (packageJson.scripts === undefined) {
-    packageJson.scripts = defaults.scripts
-  } else if (packageJson.scripts.format === undefined) {
-    packageJson.scripts.format = defaults.scripts.format
-  }
-
-  await writeFileAsync(packageJsonPath, JSON.stringify(packageJson, null, 2))
+  await writeFileAsync(
+    packageJsonPath,
+    JSON.stringify(updatedPackageJson, null, 2)
+  )
   console.log(
     `Updated ${packageJsonPath} with prettier-standard, lint-staged, and husky.`
   )
 
   console.log('Installing prettier-standard, lint-staged, and husky.')
-  const npmInstall = await execAsync(
-    'npm install prettier-standard lint-staged husky --save-dev'
-  )
-  console.log(npmInstall)
+  await execAsync('npm install prettier-standard lint-staged husky --save-dev')
   console.log('Installation complete.')
 }
