@@ -15,7 +15,7 @@ async function getPackageJsonString (packageJsonPath) {
   }
 }
 
-function parsePackageJson(packageJsonString, packageJsonPath) {
+function parsePackageJson (packageJsonString, packageJsonPath) {
   try {
     return JSON.parse(packageJsonString)
   } catch (e) {
@@ -23,7 +23,9 @@ function parsePackageJson(packageJsonString, packageJsonPath) {
   }
 }
 
-module.exports = async function (pattern = '{src,lib,test,tests,__tests__,bin}/**/*.js') {
+module.exports = async function (
+  pattern = '{src,lib,test,tests,__tests__,bin}/**/*.js'
+) {
   const defaults = {
     husky: {
       hooks: {
