@@ -23,7 +23,7 @@ function parsePackageJson(packageJsonString, packageJsonPath) {
   }
 }
 
-module.exports = async function (pattern = 'src/**/*.js') {
+module.exports = async function (pattern = '{src,lib,test,tests,__tests__,bin}/**/*.js') {
   const defaults = {
     husky: {
       hooks: {
