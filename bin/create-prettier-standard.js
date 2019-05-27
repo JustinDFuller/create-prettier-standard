@@ -2,4 +2,6 @@
 
 const createPrettierStandard = require('../')
 
-createPrettierStandard()
+const [,, glob] = process.argv
+
+createPrettierStandard(glob).catch(e => console.error(e.message))

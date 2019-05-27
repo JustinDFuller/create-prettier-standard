@@ -1,9 +1,27 @@
+const path = require('path')
 const { promisify } = require('util')
 const { readFile, writeFile } = require('fs')
-const path = require('path')
+const { exec } = require('child_process')
 
-const readFileAsync = promisify(readfile)
+const execAsync = promisify(exec)
+const readFileAsync = promisify(readFile)
 const writeFileAsync = promisify(writeFile)
+
+async function getPackageJsonString (packageJsonPath) {
+  try {
+    return await readFileAsync(packageJsonPath, 'utf8')
+  } catch (e) {
+    throw new Error(`No package.json file found at ${packageJsonPath}`)
+  }
+}
+
+function parsePackageJson(packageJsonString, packageJsonPath) {
+  try {
+    return JSON.parse(packageJsonString)
+  } catch (e) {
+    throw new Error(`Invalid JSON in package.json file at ${packageJsonPath}`)
+  }
+}
 
 module.exports = async function (pattern = 'src/**/*.js') {
   const defaults = {
@@ -16,12 +34,15 @@ module.exports = async function (pattern = 'src/**/*.js') {
       linters: {
         [pattern]: ['prettier-standard', 'git add']
       }
+    },
+    scripts: {
+      format: `prettier-standard "${pattern}"`
     }
   }
 
   const packageJsonPath = path.join(process.cwd(), 'package.json')
-  const packageJsonString = await readFileAsync(packageJsonPath, 'utf8')
-  const packageJson = JSON.parse(packageJsonString)
+  const packageJsonString = await getPackageJsonString(packageJsonPath)
+  const packageJson = parsePackageJson(packageJsonString, packageJsonPath)
 
   if (packageJson.husky === undefined) {
     packageJson.husky = defaults.husky
@@ -40,5 +61,21 @@ module.exports = async function (pattern = 'src/**/*.js') {
       defaults['lint-staged'].linters[pattern]
   }
 
-  return writeFileAsync(packageJsonPath, JSON.stringify(packageJson, null, 2))
+  if (packageJson.scripts === undefined) {
+    packageJson.scripts = defaults.scripts
+  } else if (packageJson.scripts.format === undefined) {
+    packageJson.scripts.format = defaults.scripts.format
+  }
+
+  await writeFileAsync(packageJsonPath, JSON.stringify(packageJson, null, 2))
+  console.log(
+    `Updated ${packageJsonPath} with prettier-standard, lint-staged, and husky.`
+  )
+
+  console.log('Installing prettier-standard, lint-staged, and husky.')
+  const npmInstall = await execAsync(
+    'npm install prettier-standard lint-staged husky --save-dev'
+  )
+  console.log(npmInstall)
+  console.log('Installation complete.')
 }
