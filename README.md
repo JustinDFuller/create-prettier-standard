@@ -48,3 +48,14 @@ It will add a `husky` hook for `pre-commit` which will run `lint-staged`. `lint-
 ```
 
 If you already have a format, husky, or lint-staged script it will try to add these settings without overriding anything.
+
+## Usage as a node module
+
+This package can be used as a CLI or a node module. To use it as a node module you can import it just like any other.
+```js
+const { createPrettierStandard } = require('create-prettier-standard')
+
+async function someFunction () {
+  await createPrettierStandard('GLOB_HERE')
+}
+```
