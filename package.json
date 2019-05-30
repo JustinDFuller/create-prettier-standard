@@ -16,7 +16,7 @@
     "format": "prettier-standard \"{src,lib,test,tests,__tests__,bin}/**/*.js\""
   },
   "name": "create-prettier-standard",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Initialize an app with prettier-standard, husky, lint-staged.",
   "main": "lib/index.js",
   "bin": {
