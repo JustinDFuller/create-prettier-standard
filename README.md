@@ -1,4 +1,7 @@
 # create-prettier-standard
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/JustinDFuller/create-prettier-standard.svg)](https://greenkeeper.io/)
+
 A quick way to add prettier-standard to your npm app.
 
 Use this command to add prettier-standard to your app:
